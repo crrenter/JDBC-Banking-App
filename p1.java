@@ -174,7 +174,11 @@ public class p1 {
 				break;
 			case 3:
 				//Prompt for account number and amount to deposit
-				
+				System.out.print("Enter your account number: ");
+				accNum = in.nextInt();
+				System.out.print("Enter the amount to deposit: ");
+				int balance = in.nextInt();
+				deposit(accNum, balance, stmt);
 				break;
 			case 4:
 				//prompt for account number and amount to withdraw
@@ -200,8 +204,14 @@ public class p1 {
 		}
 	}
 
+	private static void deposit(int accNum, int balance, Statement stmt) throws SQLException {
+		String sqlDeposit = "update p1.account set balance =" +
+				"(select balance from p1.account where number ="+accNum+")+"+balance+"where number = "+accNum;
+		stmt.executeUpdate(sqlDeposit);
+	}
+
 	private static void closeAccount(int accNum, Statement stmt) throws SQLException {
-		String sqlClose = "update p1.account set satus = 'I', balance = 0 where number = " + accNum;
+		String sqlClose = "update p1.account set status = 'I', balance = 0 where number =" + accNum;
 		stmt.executeUpdate(sqlClose);
 	}
 
