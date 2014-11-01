@@ -162,19 +162,22 @@ public class p1 {
 				System.out.println("Enter your initial balance");
 				int inBalance = in.nextInt();
 				int accountNum = newAccount(id, accType, inBalance, stmt);
-				System.out.println("YOUR ACCOUNT NUMBER IS: " + accountNum);
+				System.out.println("Your account number is: " + accountNum);
 				break;
 			case 2:
 				//Prompt for account number, then change the status to I
 				//and empty the account balance
-				
+				System.out.print("Enter your account number: ");
+				int accNum = in.nextInt();
+				closeAccount(accNum, stmt);
+				System.out.println("Account "+accNum+" has been closed.");
 				break;
 			case 3:
-				//Prompt for account number and amount
+				//Prompt for account number and amount to deposit
 				
 				break;
 			case 4:
-				//prompt for account number and amount
+				//prompt for account number and amount to withdraw
 				
 				break;
 			case 5: 
@@ -195,6 +198,11 @@ public class p1 {
 				break;
 			}
 		}
+	}
+
+	private static void closeAccount(int accNum, Statement stmt) throws SQLException {
+		String sqlClose = "update p1.account set satus = 'I', balance = 0 where number = " + accNum;
+		stmt.executeUpdate(sqlClose);
 	}
 
 	private static int newAccount(int id, String accType, int inBalance,
