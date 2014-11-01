@@ -12,6 +12,7 @@ public class BankingJDBC {
 	private static String driver;
 	private static int opt;
 	private static Scanner in = new Scanner(System.in);
+	private static Scanner input = new Scanner(System.in);
 	
 	public static void main(String args[]) {
 		if (args.length != 1) {
@@ -37,6 +38,7 @@ public class BankingJDBC {
 			} catch (SQLException sqlE) {
 				sqlE.printStackTrace();
 			} catch (Exception e) {
+				
 				e.printStackTrace();
 			} finally {
 			
@@ -69,7 +71,6 @@ public class BankingJDBC {
 		opt  = in.nextInt();
 		switch (opt) {
 		case 1:
-			Scanner input = new Scanner(System.in);
 			//Prompt for Name Gender Age and Pin, return Id if successful
 			System.out.println("Please enter you name, " +
 					"\nGender (M/F), " +
@@ -80,11 +81,20 @@ public class BankingJDBC {
 			int age = in.nextInt();
 			int pin = in.nextInt();
 			//Do db call with an insert then return id
-			int id = screenOneOptOne(name, gender, age, pin, stmt);
+			int id = newCust(name, gender, age, pin, stmt);
 			System.out.println("Your ID is: " + id);
 			break;
 		case 2:
-			//Go to option 2
+			//Promt for customer ID and pin to authenticate,
+			//if customer enters 0 for ID and pin go to screen #4
+			System.out.println("Enter your ID\nand Pin");
+			int custId = in.nextInt();
+			int custPin = in.nextInt();
+			if (authenticated(custId, custPin, stmt)) {
+				customerScreen(custId, custPin, stmt);
+			} else {
+				System.out.println("Wrong id or pin.");
+			}
 			break;
 		case 3:
 			//Go to option 3
@@ -95,7 +105,90 @@ public class BankingJDBC {
 		}
 	}
 
-	private static int screenOneOptOne(String name, String gender, int age,
+	private static void customerScreen(int custId, int custPin, Statement stmt) throws SQLException {
+		boolean done = false;
+		while (!done) {
+			System.out.println("Customer Main Menu" +
+					"\n1. Open Account" +
+					"\n2. Close Account" +
+					"\n3. Deposit" +
+					"\n4. Withdraw" +
+					"\n5. Transfer" +
+					"\n6. Account Summary" +
+					"\n7. Exit");
+			opt = in.nextInt();
+			switch (opt) {
+			case 1:
+				//Prompt for id, account type, initial balance
+				//returns account number if successful.
+				System.out.println("Enter your id");
+				int id = in.nextInt();
+				System.out.println("What type of account (C)hecking, or (S)avings.");
+				String accType = input.nextLine();
+				System.out.println("Enter your initial balance");
+				int inBalance = in.nextInt();
+				int accountNum = newAccount(id, accType, inBalance, stmt);
+				System.out.println("Your account number is: " + accountNum);
+				break;
+			case 2:
+				//Prompt for account number, then change the status to I
+				//and empty the account balance
+				
+				break;
+			case 3:
+				//Prompt for account number and amount
+				
+				break;
+			case 4:
+				//prompt for account number and amount
+				
+				break;
+			case 5: 
+				//prompt for the source and destination account number and amount
+				
+				break;
+			case 6:
+				//The total balance and each account number and its balance
+				//that belong to the same customer
+				
+				break;
+			case 7:
+				//Go back to the previous screen
+				done = true;
+				break;
+			default:
+				System.out.println("Invalid option.");
+				break;
+			}
+		}
+	}
+
+	private static int newAccount(int id, String accType, int inBalance,
+			Statement stmt) throws SQLException {
+		int accNum = -1;
+		String sqlMakeAcc = "insert into p1.account (id, balance, type, status) " +
+				"values ("+id+","+inBalance+",'"+accType+"','A')";
+		stmt.executeUpdate(sqlMakeAcc);
+		String getAccNum = "select Number from p1.account where id ='"+id+"'";
+		ResultSet rs = stmt.executeQuery(getAccNum);
+		while(rs.next()) {
+			accNum = rs.getInt("Number");
+		}
+		return accNum;
+	}
+
+	private static boolean authenticated(int id, int pin, Statement stmt) throws SQLException {
+		String sqlVerify = "select pin from p1.customer where id ='" + id + "'";
+		ResultSet rs = stmt.executeQuery(sqlVerify);
+		int thePin = -1;
+		while (rs.next()) {
+			thePin = rs.getInt("Pin");
+		}
+		rs.close();
+		return thePin == pin ? true : false;
+	}
+
+	private static int newCust(String name, String gender, int age,
 			int pin, Statement stmt) throws SQLException {
 		String sql = "insert into P1.Customer (Name, Gender, Age, Pin) values ('"+name+"','"+gender+"',"+age+","+pin+")";
 		stmt.executeUpdate(sql);
