@@ -206,7 +206,7 @@ public class p1 {
 
 	private static void deposit(int accNum, int balance, Statement stmt) throws SQLException {
 		String sqlDeposit = "update p1.account set balance =" +
-				"(select balance from p1.account where number ="+accNum+")+"+balance+"where number = "+accNum;
+				"(select balance from p1.account where number ="+accNum+")+"+balance+" where number = "+accNum;
 		stmt.executeUpdate(sqlDeposit);
 	}
 
