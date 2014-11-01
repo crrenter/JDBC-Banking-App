@@ -1,10 +1,10 @@
-package cs157a.p1;
+package cs157a;
 
 import java.util.*;
 import java.sql.*;
 import java.io.*;
 
-public class BankingJDBC {
+public class p1 {
 	
 	private static String db;
 	private static String user;
@@ -63,46 +63,80 @@ public class BankingJDBC {
 	  }
 	
 	private static void mainScreen(Statement stmt) throws SQLException {
-		System.out.println("Welcome to the Self Service Banking System!" +
-				"\n1. New Customer" +
-				"\n2. Customer Login" +
-				"\n3. Exit");
-		/*Get user input*/
-		opt  = in.nextInt();
-		switch (opt) {
-		case 1:
-			//Prompt for Name Gender Age and Pin, return Id if successful
-			System.out.println("Please enter you name, " +
-					"\nGender (M/F), " +
-					"\nAge, " +
-					"\nPin");
-			String name = input.nextLine();
-			String gender = input.nextLine();
-			int age = in.nextInt();
-			int pin = in.nextInt();
-			//Do db call with an insert then return id
-			int id = newCust(name, gender, age, pin, stmt);
-			System.out.println("Your ID is: " + id);
-			break;
-		case 2:
-			//Promt for customer ID and pin to authenticate,
-			//if customer enters 0 for ID and pin go to screen #4
-			System.out.println("Enter your ID\nand Pin");
-			int custId = in.nextInt();
-			int custPin = in.nextInt();
-			if (authenticated(custId, custPin, stmt)) {
-				customerScreen(custId, custPin, stmt);
-			} else {
-				System.out.println("Wrong id or pin.");
+		boolean done = false;
+		while (!done) {
+			System.out.println("Welcome to the Self Service Banking System!" +
+					"\n1. New Customer" +
+					"\n2. Customer Login" +
+					"\n3. Exit");
+			/*Get user input*/
+			opt  = in.nextInt();
+			switch (opt) {
+			case 1:
+				//Prompt for Name Gender Age and Pin, return Id if successful
+				System.out.println("Please enter you name, " +
+						"\nGender (M/F), " +
+						"\nAge, " +
+						"\nPin");
+				String name = input.nextLine();
+				String gender = input.nextLine();
+				int age = in.nextInt();
+				int pin = in.nextInt();
+				//Do db call with an insert then return id
+				int id = newCust(name, gender, age, pin, stmt);
+				System.out.println("YOUR ID IS: " + id);
+				break;
+			case 2:
+				//Prompt for customer ID and pin to authenticate,
+				//if customer enters 0 for ID and pin go to screen #4
+				System.out.println("Enter your ID\nand Pin");
+				int custId = in.nextInt();
+				int custPin = in.nextInt();
+				if (custId == 0 && custPin == 0) {
+					adminLogin();
+				}
+				else if (authenticated(custId, custPin, stmt)) {
+					customerScreen(custId, custPin, stmt);
+				} else {
+					System.out.println("WRONG ID OR PIN.");
+				}
+				break;
+			case 3:
+				//Exit
+				done = true;
+				break;
+			default:
+				System.out.println("Please choose a valid option (1, 2, or 3).");
+				break;
 			}
-			break;
-		case 3:
-			//Go to option 3
-			break;
-		default:
-			System.out.println("Please choose a valid option (1, 2, or 3).");
-			break;
 		}
+	}
+
+	private static void adminLogin() {
+		boolean done = false;
+		while (!done) {
+			System.out.println("Administrator Main Menu " +
+					"\n1. Account Summary for a Customer " +
+					"\n2. Report A :: Customer Information with Total Balance in Decreaseing Order " +
+					"\n3. Report B :: Find the Average Total Balance Between Age Groups" +
+					"\n4. Exit");
+			opt = in.nextInt();
+			switch (opt) {
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3: 
+				break;
+			case 4:
+				done = true;
+				break;
+			default:
+				System.out.println("Please choose a valid option (1, 2, 3, or 4).");
+			}
+		}
+		
+		
 	}
 
 	private static void customerScreen(int custId, int custPin, Statement stmt) throws SQLException {
@@ -128,7 +162,7 @@ public class BankingJDBC {
 				System.out.println("Enter your initial balance");
 				int inBalance = in.nextInt();
 				int accountNum = newAccount(id, accType, inBalance, stmt);
-				System.out.println("Your account number is: " + accountNum);
+				System.out.println("YOUR ACCOUNT NUMBER IS: " + accountNum);
 				break;
 			case 2:
 				//Prompt for account number, then change the status to I
@@ -157,7 +191,7 @@ public class BankingJDBC {
 				done = true;
 				break;
 			default:
-				System.out.println("Invalid option.");
+				System.out.println("Please choose a valid option (1, 2, 3, 4, 5, 6, or 7).");
 				break;
 			}
 		}
