@@ -141,6 +141,8 @@ public class p1 {
 
 	private static void customerScreen(int custId, int custPin, Statement stmt) throws SQLException {
 		boolean done = false;
+		int balance, accNum, id, amount;
+		String accType;
 		while (!done) {
 			System.out.println("Customer Main Menu" +
 					"\n1. Open Account" +
@@ -156,19 +158,19 @@ public class p1 {
 				//Prompt for id, account type, initial balance
 				//returns account number if successful.
 				System.out.println("Enter your id");
-				int id = in.nextInt();
+				id = in.nextInt();
 				System.out.println("What type of account (C)hecking, or (S)avings.");
-				String accType = input.nextLine();
+				accType = input.nextLine();
 				System.out.println("Enter your initial balance");
-				int inBalance = in.nextInt();
-				int accountNum = newAccount(id, accType, inBalance, stmt);
-				System.out.println("Your account number is: " + accountNum);
+				balance = in.nextInt();
+				accNum = newAccount(id, accType, balance, stmt);
+				System.out.println("Your account number is: " + accNum);
 				break;
 			case 2:
 				//Prompt for account number, then change the status to I
 				//and empty the account balance
 				System.out.print("Enter your account number: ");
-				int accNum = in.nextInt();
+				accNum = in.nextInt();
 				closeAccount(accNum, stmt);
 				System.out.println("Account "+accNum+" has been closed.");
 				break;
@@ -177,12 +179,20 @@ public class p1 {
 				System.out.print("Enter your account number: ");
 				accNum = in.nextInt();
 				System.out.print("Enter the amount to deposit: ");
-				int balance = in.nextInt();
-				deposit(accNum, balance, stmt);
+				amount = in.nextInt();
+				deposit(accNum, amount, stmt);
 				break;
 			case 4:
 				//prompt for account number and amount to withdraw
-				
+				System.out.print("Enter your account number: ");
+				accNum = in.nextInt();
+				System.out.print("Enter the amount to withdraw: ");
+				amount = in.nextInt();
+				if (!validAcc(accNum, stmt)) {
+					System.out.println("Invalid account number.");
+				} else {
+					withdraw(accNum, amount, stmt);
+				}
 				break;
 			case 5: 
 				//prompt for the source and destination account number and amount
@@ -204,9 +214,28 @@ public class p1 {
 		}
 	}
 
-	private static void deposit(int accNum, int balance, Statement stmt) throws SQLException {
+	private static void withdraw(int accNum, int amt, Statement stmt) throws SQLException {
+		String sqlWithdraw = "update p1.account set balance = " +
+				"(select balance from p1.account where number = "+accNum+")-"+amt+" where number = "+accNum;
+		//checkRemainBal(accNum, amt, stmt);
+		stmt.executeUpdate(sqlWithdraw);
+		
+	}
+
+	private static boolean validAcc(int accNum, Statement stmt) throws SQLException {
+		String sqlValidateAcc = "select id from p1.account where number = "+accNum;
+		ResultSet rs = stmt.executeQuery(sqlValidateAcc);
+		int id = -1;
+		while (rs.next()) {
+			id = rs.getInt("ID");
+		}
+		rs.close();
+		return id >= 100 ? true : false;
+	}
+
+	private static void deposit(int accNum, int amt, Statement stmt) throws SQLException {
 		String sqlDeposit = "update p1.account set balance =" +
-				"(select balance from p1.account where number ="+accNum+")+"+balance+" where number = "+accNum;
+				"(select balance from p1.account where number ="+accNum+")+"+amt+" where number = "+accNum;
 		stmt.executeUpdate(sqlDeposit);
 	}
 
