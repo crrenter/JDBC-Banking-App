@@ -1,5 +1,3 @@
-package cs157a;
-
 import java.util.*;
 import java.sql.*;
 import java.io.*;
@@ -211,7 +209,7 @@ public class p1 {
 			case 6:
 				//The total balance and each account number and its balance
 				//that belong to the same customer
-				
+				accSummary(custId, stmt);
 				break;
 			case 7:
 				//Go back to the previous screen
@@ -222,6 +220,19 @@ public class p1 {
 				break;
 			}
 		}
+	}
+
+	private static void accSummary(int custId, Statement stmt) throws SQLException {
+		String sqlSummary = "select sum(balance) as TotalBalance from p1.account where id = "+custId;
+		int totalBal = -1;
+		ResultSet rs = stmt.executeQuery(sqlSummary);
+		while (rs.next()) {
+			totalBal = rs.getInt("TotalBalance");
+		}
+		System.out.println("Total balance: " + totalBal);
+		
+		//sqlSummary = "select "
+		rs.close();
 	}
 
 	private static void transfer(int accNum, int accNum2, int amount,
