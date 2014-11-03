@@ -141,7 +141,7 @@ public class p1 {
 
 	private static void customerScreen(int custId, int custPin, Statement stmt) throws SQLException {
 		boolean done = false;
-		int balance, accNum, id, amount;
+		int balance, accNum, accNum2, id, amount;
 		String accType;
 		while (!done) {
 			System.out.println("Customer Main Menu" +
@@ -196,7 +196,17 @@ public class p1 {
 				break;
 			case 5: 
 				//prompt for the source and destination account number and amount
-				
+				System.out.print("Enter source account number: ");
+				accNum = in.nextInt();
+				System.out.println("Enter destination account number: ");
+				accNum2 = in.nextInt();
+				System.out.println("Enter transfer amount: ");
+				amount = in.nextInt();
+				if (validAcc(accNum, stmt) && validAcc(accNum2, stmt)) {
+					transfer(accNum, accNum2, amount, stmt);
+				} else {
+					System.out.println("Invalid account number(s).");
+				}
 				break;
 			case 6:
 				//The total balance and each account number and its balance
@@ -214,12 +224,16 @@ public class p1 {
 		}
 	}
 
+	private static void transfer(int accNum, int accNum2, int amount,
+			Statement stmt) throws SQLException {
+		withdraw(accNum, amount, stmt);
+		deposit(accNum2, amount, stmt);
+	}
+
 	private static void withdraw(int accNum, int amt, Statement stmt) throws SQLException {
 		String sqlWithdraw = "update p1.account set balance = " +
 				"(select balance from p1.account where number = "+accNum+")-"+amt+" where number = "+accNum;
-		//checkRemainBal(accNum, amt, stmt);
 		stmt.executeUpdate(sqlWithdraw);
-		
 	}
 
 	private static boolean validAcc(int accNum, Statement stmt) throws SQLException {
