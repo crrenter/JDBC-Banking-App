@@ -121,12 +121,18 @@ public class p1 {
 			opt = in.nextInt();
 			switch (opt) {
 			case 1:
+				//Get account summary for a customer, provide a customer id
+				
 				break;
 			case 2:
+				//You would display customer Id, Name, age, gender and total balance
+				
 				break;
 			case 3: 
+				//Find average total balance between age groups
 				break;
 			case 4:
+				//Exit
 				done = true;
 				break;
 			default:
@@ -224,14 +230,19 @@ public class p1 {
 
 	private static void accSummary(int custId, Statement stmt) throws SQLException {
 		String sqlSummary = "select sum(balance) as TotalBalance from p1.account where id = "+custId;
-		int totalBal = -1;
+		int totalBal = -1, accNum, balance;
 		ResultSet rs = stmt.executeQuery(sqlSummary);
 		while (rs.next()) {
 			totalBal = rs.getInt("TotalBalance");
 		}
-		System.out.println("Total balance: " + totalBal);
-		
-		//sqlSummary = "select "
+		System.out.println("Your total balance is: " + totalBal);
+		sqlSummary = "select number, balance from p1.account where id ="+custId;
+		rs = stmt.executeQuery(sqlSummary);
+		while(rs.next()) {
+			accNum = rs.getInt("Number");
+			balance = rs.getInt("Balance");
+			System.out.println("The balance for "+accNum+" is: "+balance);
+		}
 		rs.close();
 	}
 
