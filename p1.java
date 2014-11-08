@@ -91,7 +91,7 @@ public class p1 {
 				int custId = in.nextInt();
 				int custPin = in.nextInt();
 				if (custId == 0 && custPin == 0) {
-					adminLogin();
+					adminLogin(stmt);
 				}
 				else if (authenticated(custId, custPin, stmt)) {
 					customerScreen(custId, custPin, stmt);
@@ -110,7 +110,7 @@ public class p1 {
 		}
 	}
 
-	private static void adminLogin() {
+	private static void adminLogin(Statement stmt) throws SQLException {
 		boolean done = false;
 		while (!done) {
 			System.out.println("Administrator Main Menu " +
@@ -122,7 +122,9 @@ public class p1 {
 			switch (opt) {
 			case 1:
 				//Get account summary for a customer, provide a customer id
-				
+				System.out.println("Enter a customer ID to get an account summary: ");
+				int id = in.nextInt();
+				accSummary(id, stmt);
 				break;
 			case 2:
 				//You would display customer Id, Name, age, gender and total balance
@@ -130,6 +132,7 @@ public class p1 {
 				break;
 			case 3: 
 				//Find average total balance between age groups
+				
 				break;
 			case 4:
 				//Exit
@@ -235,7 +238,7 @@ public class p1 {
 		while (rs.next()) {
 			totalBal = rs.getInt("TotalBalance");
 		}
-		System.out.println("Your total balance is: " + totalBal);
+		System.out.println("The total balance is: " + totalBal);
 		sqlSummary = "select number, balance from p1.account where id ="+custId;
 		rs = stmt.executeQuery(sqlSummary);
 		while(rs.next()) {
