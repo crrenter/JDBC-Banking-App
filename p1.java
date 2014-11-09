@@ -38,9 +38,6 @@ public class p1 {
 			} catch (Exception e) {
 				
 				e.printStackTrace();
-			} finally {
-			
-				
 			}
 		}
 	}
@@ -129,13 +126,18 @@ public class p1 {
 				break;
 			case 2:
 				//You would display customer Id, Name, age, gender and total balance
-				System.out.println("Enter a customer ID to display information: ");
+				System.out.print("Enter a customer ID to display information: ");
 				id = in.nextInt();
 				custInfo(id, stmt);
 				break;
 			case 3: 
 				//Find average total balance between age groups
-				
+				int minAge, maxAge;
+				System.out.println("Enter min age: ");
+				minAge = in.nextInt();
+				System.out.println("Enter max age: ");
+				maxAge = in.nextInt();
+				avgTotalBal(minAge, maxAge, stmt);
 				break;
 			case 4:
 				//Exit
@@ -145,8 +147,22 @@ public class p1 {
 				System.out.println("Please choose a valid option (1, 2, 3, or 4).");
 			}
 		}
-		
-		
+	}
+
+	private static void avgTotalBal(int minAge, int maxAge, Statement stmt) throws SQLException {
+		String sqlAvgTotal = "select avg(age) as \"Average Age\", avg(balance) as \"Average Balance\" "+
+				"from p1.customer as C, p1.account as A "+
+				"where C.age >= " + minAge + " and C.age <= "+ maxAge +
+				" and A.status = 'A'";
+		ResultSet rs = stmt.executeQuery(sqlAvgTotal);
+		int age, balance;
+		System.out.println("AVERAGE AGE\tAVERAGE BALANCE");
+		while (rs.next()) {
+			age = rs.getInt("Average age");
+			balance = rs.getInt("Average Balance");
+			System.out.println(age + "\t\t" + balance);
+		}
+		rs.close();
 	}
 
 	private static void custInfo(int id, Statement stmt) throws SQLException {
