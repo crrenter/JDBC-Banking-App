@@ -112,6 +112,7 @@ public class p1 {
 
 	private static void adminLogin(Statement stmt) throws SQLException {
 		boolean done = false;
+		int id;
 		while (!done) {
 			System.out.println("Administrator Main Menu " +
 					"\n1. Account Summary for a Customer " +
@@ -123,12 +124,14 @@ public class p1 {
 			case 1:
 				//Get account summary for a customer, provide a customer id
 				System.out.println("Enter a customer ID to get an account summary: ");
-				int id = in.nextInt();
+				id = in.nextInt();
 				accSummary(id, stmt);
 				break;
 			case 2:
 				//You would display customer Id, Name, age, gender and total balance
-				
+				System.out.println("Enter a customer ID to display information: ");
+				id = in.nextInt();
+				custInfo(id, stmt);
 				break;
 			case 3: 
 				//Find average total balance between age groups
@@ -144,6 +147,30 @@ public class p1 {
 		}
 		
 		
+	}
+
+	private static void custInfo(int id, Statement stmt) throws SQLException {
+		String sqlInfo  = "select C.ID, Name, Age, Gender, sum(balance) as \"TOTAL BALANCE\" "+
+				"from p1.customer as C, p1.account as A " +
+				"where C.id = " + id + " " +
+				"group by C.ID, Name, Age, Gender " +
+				"order by \"TOTAL BALANCE\" desc";
+		String name, gender;
+		int age, total;
+		ResultSet rs = stmt.executeQuery(sqlInfo);
+		System.out.println("ID\tNAME\t\tAGE\tGENDER\tTOTAL BALANCE");
+		while (rs.next()) {
+			id = rs.getInt("ID");
+			name = rs.getString("Name");
+			age = rs.getInt("Age");
+			gender = rs.getString("Gender");
+			total = rs.getInt("TOTAL BALANCE");
+			if (name.length() >= 10)
+				System.out.println(id +"\t" + name + "\t" + age + "\t" + gender + "\t" + total);
+			else 
+				System.out.println(id +"\t" + name + "\t\t" + age + "\t" + gender + "\t" + total);
+		}
+		rs.close();
 	}
 
 	private static void customerScreen(int custId, int custPin, Statement stmt) throws SQLException {
@@ -232,21 +259,23 @@ public class p1 {
 	}
 
 	private static void accSummary(int custId, Statement stmt) throws SQLException {
-		String sqlSummary = "select sum(balance) as TotalBalance from p1.account where id = "+custId;
+		String sqlSummary = "select sum(balance) as \"TOTAL BALANCE\" from p1.account where id = "+custId;
 		int totalBal = -1, accNum, balance;
-		ResultSet rs = stmt.executeQuery(sqlSummary);
-		while (rs.next()) {
-			totalBal = rs.getInt("TotalBalance");
+		ResultSet rs1 = stmt.executeQuery(sqlSummary);
+		while (rs1.next()) {
+			totalBal = rs1.getInt("TOTAL BALANCE");
 		}
-		System.out.println("The total balance is: " + totalBal);
+		
 		sqlSummary = "select number, balance from p1.account where id ="+custId;
-		rs = stmt.executeQuery(sqlSummary);
-		while(rs.next()) {
-			accNum = rs.getInt("Number");
-			balance = rs.getInt("Balance");
-			System.out.println("The balance for "+accNum+" is: "+balance);
+		ResultSet rs2 = stmt.executeQuery(sqlSummary);
+		System.out.println("TOTAL BALANCE\tACCOUNT\tBALANCE");
+		while(rs2.next()) {
+			accNum = rs2.getInt("Number");
+			balance = rs2.getInt("Balance");
+			System.out.println(totalBal + "\t\t"+accNum+"\t"+balance);
 		}
-		rs.close();
+		rs1.close();
+		rs2.close();
 	}
 
 	private static void transfer(int accNum, int accNum2, int amount,
