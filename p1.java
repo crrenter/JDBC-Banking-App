@@ -69,23 +69,31 @@ public class p1 {
 			switch (opt) {
 			case 1:
 				//Prompt for Name Gender Age and Pin, return Id if successful
-				System.out.println("Please enter you name, " +
-						"\nGender (M/F), " +
-						"\nAge, " +
-						"\nPin");
+				int id = -1;
+				System.out.print("Name: ");
 				String name = input.nextLine();
-				String gender = input.nextLine();
+				boolean finished = false;
+				String gender = "";
+				while (!finished) {
+					System.out.print("Gender (M/F): ");
+					gender = input.nextLine();
+					if ("mMfF".contains(gender))
+						finished = true;
+				}
+				System.out.print("Age: ");
 				int age = in.nextInt();
+				System.out.print("Pin: ");
 				int pin = in.nextInt();
 				//Do db call with an insert then return id
-				int id = newCust(name, gender, age, pin, stmt);
+				id = newCust(name, gender, age, pin, stmt);
 				System.out.println("YOUR ID IS: " + id);
 				break;
 			case 2:
 				//Prompt for customer ID and pin to authenticate,
 				//if customer enters 0 for ID and pin go to screen #4
-				System.out.println("Enter your ID\nand Pin");
+				System.out.print("ID: ");
 				int custId = in.nextInt();
+				System.out.print("Pin: ");
 				int custPin = in.nextInt();
 				if (custId == 0 && custPin == 0) {
 					adminLogin(stmt);
@@ -113,29 +121,29 @@ public class p1 {
 		while (!done) {
 			System.out.println("Administrator Main Menu " +
 					"\n1. Account Summary for a Customer " +
-					"\n2. Report A :: Customer Information with Total Balance in Decreaseing Order " +
+					"\n2. Report A :: Customer Information with Total Balance in Decreasing Order " +
 					"\n3. Report B :: Find the Average Total Balance Between Age Groups" +
 					"\n4. Exit");
 			opt = in.nextInt();
 			switch (opt) {
 			case 1:
 				//Get account summary for a customer, provide a customer id
-				System.out.println("Enter a customer ID to get an account summary: ");
+				System.out.print("ID: ");
 				id = in.nextInt();
 				accSummary(id, stmt);
 				break;
 			case 2:
 				//You would display customer Id, Name, age, gender and total balance
-				System.out.print("Enter a customer ID to display information: ");
-				id = in.nextInt();
-				custInfo(id, stmt);
+				//System.out.print("ID: ");
+				//id = in.nextInt();
+				custInfo(stmt);//id, stmt);
 				break;
 			case 3: 
 				//Find average total balance between age groups
 				int minAge, maxAge;
-				System.out.println("Enter min age: ");
+				System.out.println("Min age: ");
 				minAge = in.nextInt();
-				System.out.println("Enter max age: ");
+				System.out.println("Max age: ");
 				maxAge = in.nextInt();
 				avgTotalBal(minAge, maxAge, stmt);
 				break;
@@ -165,14 +173,14 @@ public class p1 {
 		rs.close();
 	}
 
-	private static void custInfo(int id, Statement stmt) throws SQLException {
+	private static void custInfo(Statement stmt) throws SQLException {
 		String sqlInfo  = "select C.ID, Name, Age, Gender, sum(balance) as \"TOTAL BALANCE\" "+
 				"from p1.customer as C, p1.account as A " +
-				"where C.id = " + id + " " +
+				"where C.id = A.id and A.status = 'A'" +
 				"group by C.ID, Name, Age, Gender " +
 				"order by \"TOTAL BALANCE\" desc";
 		String name, gender;
-		int age, total;
+		int id, age, total;
 		ResultSet rs = stmt.executeQuery(sqlInfo);
 		System.out.println("ID\tNAME\t\tAGE\tGENDER\tTOTAL BALANCE");
 		while (rs.next()) {
@@ -207,11 +215,11 @@ public class p1 {
 			case 1:
 				//Prompt for id, account type, initial balance
 				//returns account number if successful.
-				System.out.println("Enter your id");
+				System.out.print("Enter an ID: ");
 				id = in.nextInt();
-				System.out.println("What type of account (C)hecking, or (S)avings.");
+				System.out.print("What type of account (C)hecking, or (S)avings: ");
 				accType = input.nextLine();
-				System.out.println("Enter your initial balance");
+				System.out.print("Enter your initial balance: ");
 				balance = in.nextInt();
 				accNum = newAccount(id, accType, balance, stmt);
 				System.out.println("Your account number is: " + accNum);
@@ -219,14 +227,13 @@ public class p1 {
 			case 2:
 				//Prompt for account number, then change the status to I
 				//and empty the account balance
-				System.out.print("Enter your account number: ");
+				System.out.print("Enter an account number: ");
 				accNum = in.nextInt();
-				closeAccount(accNum, stmt);
-				System.out.println("Account "+accNum+" has been closed.");
+				closeAccount(custId, accNum, stmt);
 				break;
 			case 3:
 				//Prompt for account number and amount to deposit
-				System.out.print("Enter your account number: ");
+				System.out.print("Enter an account number: ");
 				accNum = in.nextInt();
 				System.out.print("Enter the amount to deposit: ");
 				amount = in.nextInt();
@@ -241,19 +248,19 @@ public class p1 {
 				if (!validAcc(accNum, stmt)) {
 					System.out.println("Invalid account number.");
 				} else {
-					withdraw(accNum, amount, stmt);
+					withdraw(custId, accNum, amount, stmt);
 				}
 				break;
 			case 5: 
 				//prompt for the source and destination account number and amount
 				System.out.print("Enter source account number: ");
 				accNum = in.nextInt();
-				System.out.println("Enter destination account number: ");
+				System.out.print("Enter destination account number: ");
 				accNum2 = in.nextInt();
-				System.out.println("Enter transfer amount: ");
+				System.out.print("Enter transfer amount: ");
 				amount = in.nextInt();
 				if (validAcc(accNum, stmt) && validAcc(accNum2, stmt)) {
-					transfer(accNum, accNum2, amount, stmt);
+					transfer(custId, accNum, accNum2, amount, stmt);
 				} else {
 					System.out.println("Invalid account number(s).");
 				}
@@ -273,6 +280,17 @@ public class p1 {
 			}
 		}
 	}
+	
+	private static boolean isOwner(int id, int accNum, Statement stmt) throws SQLException {
+		String sqlGetID = "select id from p1.account where number = "+accNum;
+		ResultSet rs = stmt.executeQuery(sqlGetID);
+		boolean owner = false;
+		while (rs.next()) {
+			owner = id == rs.getInt("ID") ? true : false;
+		}
+		rs.close();
+		return owner;
+	}
 
 	private static void accSummary(int custId, Statement stmt) throws SQLException {
 		String sqlSummary = "select sum(balance) as \"TOTAL BALANCE\" from p1.account where id = "+custId;
@@ -282,28 +300,39 @@ public class p1 {
 			totalBal = rs1.getInt("TOTAL BALANCE");
 		}
 		
-		sqlSummary = "select number, balance from p1.account where id ="+custId;
+		sqlSummary = "select number, balance from p1.account where id ="+custId + " and status = 'A'";
 		ResultSet rs2 = stmt.executeQuery(sqlSummary);
 		System.out.println("TOTAL BALANCE\tACCOUNT\tBALANCE");
+		String output = totalBal+"";
 		while(rs2.next()) {
 			accNum = rs2.getInt("Number");
 			balance = rs2.getInt("Balance");
-			System.out.println(totalBal + "\t\t"+accNum+"\t"+balance);
+			output += "\t\t"+accNum +"\t"+balance;
+			System.out.println(output);
+			output = "";
 		}
 		rs1.close();
 		rs2.close();
 	}
 
-	private static void transfer(int accNum, int accNum2, int amount,
+	private static void transfer(int custId, int accNum, int accNum2, int amount,
 			Statement stmt) throws SQLException {
-		withdraw(accNum, amount, stmt);
-		deposit(accNum2, amount, stmt);
+		if (isOwner(custId, accNum, stmt)) {
+			withdraw(custId, accNum, amount, stmt);
+			deposit(accNum2, amount, stmt);
+		} else {
+			System.out.println("You cannot transfer from an account that you do not own.");
+		}
 	}
 
-	private static void withdraw(int accNum, int amt, Statement stmt) throws SQLException {
-		String sqlWithdraw = "update p1.account set balance = " +
-				"(select balance from p1.account where number = "+accNum+")-"+amt+" where number = "+accNum;
-		stmt.executeUpdate(sqlWithdraw);
+	private static void withdraw(int id, int accNum, int amt, Statement stmt) throws SQLException {
+		if (isOwner(id, accNum, stmt)) {
+			String sqlWithdraw = "update p1.account set balance = " +
+					"(select balance from p1.account where number = "+accNum+")-"+amt+" where number = "+accNum;
+			stmt.executeUpdate(sqlWithdraw);
+		} else {
+			System.out.println("You are not the owner of " + accNum);
+		}
 	}
 
 	private static boolean validAcc(int accNum, Statement stmt) throws SQLException {
@@ -323,9 +352,14 @@ public class p1 {
 		stmt.executeUpdate(sqlDeposit);
 	}
 
-	private static void closeAccount(int accNum, Statement stmt) throws SQLException {
-		String sqlClose = "update p1.account set status = 'I', balance = 0 where number =" + accNum;
-		stmt.executeUpdate(sqlClose);
+	private static void closeAccount(int id, int accNum, Statement stmt) throws SQLException {
+		if (isOwner(id, accNum, stmt)) {
+			String sqlClose = "update p1.account set status = 'I', balance = 0 where number =" + accNum;
+			stmt.executeUpdate(sqlClose);
+			System.out.println("Account "+accNum+" has been closed.");
+		} else {
+			System.out.println("You are not the owner of " + accNum);
+		}
 	}
 
 	private static int newAccount(int id, String accType, int inBalance,
