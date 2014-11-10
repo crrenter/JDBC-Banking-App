@@ -9,10 +9,7 @@ import java.io.*;
 
 public class p1 {
 	
-	private static String db;
-	private static String user;
-	private static String pwd;
-	private static String driver;
+	private static String db, user, pwd, driver;
 	private static int opt;
 	private static Scanner in = new Scanner(System.in);
 	private static Scanner input = new Scanner(System.in);
