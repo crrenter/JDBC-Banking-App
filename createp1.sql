@@ -1,3 +1,8 @@
+-- P1
+-- Section 5
+-- Student ID: 006152874
+-- Renteria, Carlos,
+
 create table p1.Customer (
 	id		integer		not null generated always as identity 
 	(start with 100 increment by 1) primary key,
@@ -14,7 +19,4 @@ create table p1.account (
 	balance 	integer 	not null	check (balance >= 0),
 	type		char		not null	check (type in ('C', 'S')),
 	status		char		not null 	check (status in ('A', 'I'))
-);	
-
-drop table p1.customer;
-drop table p1.account;
+);
